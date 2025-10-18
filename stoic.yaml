@@ -1,0 +1,9 @@
+llm:
+  provider: ollama
+  ollama:
+    base_url: http://localhost:11434
+    model: llama2
+
+ui:
+  theme: calm
+  language: zh
