@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/narcilee7/stoic/provider"
+	"github.com/stoic/provider"
 )
 
 type TaoistPhilosopher struct {

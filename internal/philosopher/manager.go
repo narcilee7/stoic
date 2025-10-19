@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/narcilee7/stoic/internal/config"
-	"github.com/narcilee7/stoic/provider"
+	"github.com/stoic/internal/config"
+	"github.com/stoic/provider"
 )
 
 type Philosopher interface {
@@ -33,9 +33,20 @@ func NewManager(cfg *config.Config) (*Manager, error) {
 		philosophers: make(map[string]Philosopher),
 	}
 
-	// 注册默认哲学家
-	if err := manager.registerDefaultPhilosophers(); err != nil {
-		return nil, fmt.Errorf("error registering default philosophers: %w", err)
+	if len(cfg.Philosophers.Custom) > 0 {
+		if err := manager.LoadPhilosophersFromConfig(cfg.Philosophers.Custom); err != nil {
+			return nil, fmt.Errorf("error loading philosophers from config: %w", err)
+		}
+	}
+
+	if len(manager.philosophers) == 0 {
+		if err := manager.registerDefaultPhilosophers(); err != nil {
+			return nil, fmt.Errorf("error registering default philosophers: %w", err)
+		}
+	}
+
+	for _, disabledID := range cfg.Philosophers.Disabled {
+		delete(manager.philosophers, disabledID)
 	}
 
 	return manager, nil
@@ -79,15 +90,11 @@ func (m *Manager) ListPhilosophers() []string {
 	return names
 }
 
-// LoadPhilosophersFromConfig 从配置加载哲学家
-func (m *Manager) LoadPhilosophersFromConfig(configs []PhilosopherConfig) error {
+// 从配置加载哲学家
+func (m *Manager) LoadPhilosophersFromConfig(configs []config.PhilosopherConfig) error {
 	for _, config := range configs {
 		if !config.Enabled {
 			continue
-		}
-
-		if err := config.Validate(); err != nil {
-			return fmt.Errorf("invalid philosopher config for %s: %w", config.ID, err)
 		}
 
 		philosopher := NewConfigurablePhilosopher(config, m.provider)
@@ -99,7 +106,7 @@ func (m *Manager) LoadPhilosophersFromConfig(configs []PhilosopherConfig) error 
 
 func (m *Manager) registerDefaultPhilosophers() error {
 	// 定义默认哲学家配置
-	defaultConfigs := []PhilosopherConfig{
+	defaultConfigs := []config.PhilosopherConfig{
 		{
 			ID:          "stoic",
 			Name:        "Marcus Aurelius",

@@ -8,8 +8,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/narcilee7/stoic/internal/config"
-	"github.com/narcilee7/stoic/internal/philosopher"
+	"github.com/stoic/internal/config"
+	"github.com/stoic/internal/philosopher"
 )
 
 type App struct {

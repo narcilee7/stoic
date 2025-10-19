@@ -3,18 +3,31 @@ package philosopher
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
 
-	"github.com/narcilee7/stoic/provider"
+	"github.com/stoic/internal/config"
+	"github.com/stoic/provider"
 )
 
 // ConfigurablePhilosopher 可配置的哲学家
 type ConfigurablePhilosopher struct {
-	config   PhilosopherConfig
-	provider provider.Provider
+	config      config.PhilosopherConfig
+	provider    provider.Provider
+	memory      []ConversationMemory
+	mood        string
+	preferences map[string]interface{}
+}
+
+type ConversationMemory struct {
+	UserMessage         string    `json:"user_message"`
+	PhilosopherResponse string    `json:"philosopher_response"`
+	Timestamp           time.Time `json:"timestamp"`
+	Emotion             string    `json:"emotion"`
 }
 
 // NewConfigurablePhilosopher 创建可配置哲学家
-func NewConfigurablePhilosopher(config PhilosopherConfig, provider provider.Provider) *ConfigurablePhilosopher {
+func NewConfigurablePhilosopher(config config.PhilosopherConfig, provider provider.Provider) *ConfigurablePhilosopher {
 	return &ConfigurablePhilosopher{
 		config:   config,
 		provider: provider,
@@ -59,4 +72,28 @@ Respond as %s would, with %s wisdom:`,
 	}
 
 	return response, nil
+}
+
+func (c *ConfigurablePhilosopher) AddMemory(userMsg, response, emotion string) {
+	c.memory = append(c.memory, ConversationMemory{
+		UserMessage:         userMsg,
+		PhilosopherResponse: response,
+		Timestamp:           time.Now(),
+		Emotion:             emotion,
+	})
+
+	// 进程内存缓存10条
+	if len(c.memory) > 10 {
+		c.memory = c.memory[1:]
+	}
+}
+
+func (c *ConfigurablePhilosopher) GetRelevantMemories(query string) []ConversationMemory {
+	var relevant []ConversationMemory
+	for _, memory := range c.memory {
+		if strings.Contains(strings.ToLower(memory.UserMessage), strings.ToLower(query)) {
+			relevant = append(relevant, memory)
+		}
+	}
+	return relevant
 }
