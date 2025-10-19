@@ -182,10 +182,15 @@ func (a *App) calmView() string {
 		Foreground(lipgloss.Color("250")).
 		Italic(true)
 
-	philInfo := fmt.Sprintf("Speaking with %s (%s)",
-		a.currentPhilosopher.Name(),
-		a.currentPhilosopher.School())
-	sb.WriteString(philStyle.Render(philInfo))
+	// 确保currentPhilosopher不为nil
+	if a.currentPhilosopher != nil {
+		philInfo := fmt.Sprintf("Speaking with %s (%s)",
+			a.currentPhilosopher.Name(),
+			a.currentPhilosopher.School())
+		sb.WriteString(philStyle.Render(philInfo))
+	} else {
+		sb.WriteString(philStyle.Render("No philosopher selected"))
+	}
 	sb.WriteString("\n\n")
 
 	messageStyle := lipgloss.NewStyle().
@@ -201,13 +206,19 @@ func (a *App) calmView() string {
 			userStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("87"))
 			messages.WriteString(userStyle.Render("You: " + msg.Content))
 		} else {
-			philStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("214"))
-			messages.WriteString(philStyle.Render(a.currentPhilosopher.Name() + ": " + msg.Content))
+			if a.currentPhilosopher != nil {
+				philStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("214"))
+				messages.WriteString(philStyle.Render(a.currentPhilosopher.Name() + ": " + msg.Content))
+			} else {
+				// 如果没有哲学家，使用通用名称
+				philStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("214"))
+				messages.WriteString(philStyle.Render("Philosopher: " + msg.Content))
+			}
 		}
 		messages.WriteString("\n")
 	}
 
-	if a.typingInProgress && a.typingMessage != "" {
+	if a.typingInProgress && a.typingMessage != "" && a.currentPhilosopher != nil {
 		typingStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("214"))
 		messages.WriteString(typingStyle.Render(a.currentPhilosopher.Name() + ": " + a.typingMessage))
 		messages.WriteString("█")
