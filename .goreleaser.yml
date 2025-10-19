@@ -1,0 +1,45 @@
+version: 2
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: stoic
+    binary: stoic
+    main: ./cmd/main.go
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: darwin
+        goarch: 386
+
+archives:
+  - id: stoic-archive
+    format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    files:
+      - LICENSE
+      - README.md
+      - stoic.yaml  # 如果有配置文件，包含它
+
+  - id: stoic-windows
+    format: zip
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}.zip"
+    files:
+      - LICENSE
+      - README.md
+      - stoic.yaml
+
+release:
+  github:
+    owner: narcilee7
+    name: stoic
+  name_template: "{{ .Tag }}"
+  draft: false
