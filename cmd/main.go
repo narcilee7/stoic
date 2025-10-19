@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/narcilee7/stoic/internal/config"
-	"github.com/narcilee7/stoic/internal/philosopher"
-	"github.com/narcilee7/stoic/internal/ui"
+	"github.com/stoic/internal/config"
+	"github.com/stoic/internal/philosopher"
+	"github.com/stoic/internal/ui"
 )
 
 func main() {

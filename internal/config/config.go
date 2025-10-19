@@ -7,8 +7,9 @@ import (
 )
 
 type Config struct {
-	LLM LLMConfig `mapstructure:"llm"`
-	UI  UIConfig  `mapstructure:"ui"`
+	LLM          LLMConfig          `mapstructure:"llm"`
+	UI           UIConfig           `mapstructure:"ui"`
+	Philosophers PhilosophersConfig `mapstructure:"philosophers"`
 }
 
 type LLMConfig struct {
@@ -24,6 +25,24 @@ type OllamaConfig struct {
 type UIConfig struct {
 	Theme    string `mapstructure:"theme"`
 	Language string `mapstructure:"language"`
+}
+
+// 将 PhilosopherConfig 移到这里，避免循环依赖
+type PhilosopherConfig struct {
+	ID          string `yaml:"id" mapstructure:"id"`
+	Name        string `yaml:"name" mapstructure:"name"`
+	School      string `yaml:"school" mapstructure:"school"`
+	Description string `yaml:"description" mapstructure:"description"`
+	Personality string `yaml:"personality" mapstructure:"personality"`
+	Style       string `yaml:"style" mapstructure:"style"`
+	Prompt      string `yaml:"prompt" mapstructure:"prompt"`
+	Emoji       string `yaml:"emoji" mapstructure:"emoji"`
+	Enabled     bool   `yaml:"enabled" mapstructure:"enabled"`
+}
+
+type PhilosophersConfig struct {
+	Custom   []PhilosopherConfig `mapstructure:"custom"`
+	Disabled []string            `mapstructure:"disabled"`
 }
 
 func Load() (*Config, error) {
@@ -50,9 +69,39 @@ func Load() (*Config, error) {
 }
 
 func setDefaults() {
-	viper.SetDefault("ai.provider", "ollama")
-	viper.SetDefault("ai.ollama.base_url", "http://localhost:11434")
-	viper.SetDefault("ai.ollama.model", "llama2")
+	viper.SetDefault("llm.provider", "ollama")
+	viper.SetDefault("llm.ollama.base_url", "http://localhost:11434")
+	viper.SetDefault("llm.ollama.model", "llama2")
 	viper.SetDefault("ui.theme", "calm")
 	viper.SetDefault("ui.language", "zh")
+	viper.SetDefault("philosophers.custom", []interface{}{})
+	viper.SetDefault("philosophers.disabled", []interface{}{})
+}
+
+func (c *PhilosopherConfig) Validate() error {
+	if c.ID == "" {
+		return fmt.Errorf("id is required")
+	}
+	if c.Name == "" {
+		return fmt.Errorf("name is required")
+	}
+	if c.School == "" {
+		return fmt.Errorf("school is required")
+	}
+	if c.Description == "" {
+		return fmt.Errorf("description is required")
+	}
+	if c.Personality == "" {
+		return fmt.Errorf("personality is required")
+	}
+	if c.Style == "" {
+		return fmt.Errorf("style is required")
+	}
+	if c.Prompt == "" {
+		return fmt.Errorf("prompt is required")
+	}
+	if c.Emoji == "" {
+		return fmt.Errorf("emoji is required")
+	}
+	return nil
 }
