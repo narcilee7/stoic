@@ -49,6 +49,15 @@ func NewManager(cfg *config.Config) (*Manager, error) {
 		delete(manager.philosophers, disabledID)
 	}
 
+	// 设置默认当前哲学家
+	if len(manager.philosophers) > 0 {
+		// 获取第一个可用的哲学家作为默认
+		for _, phil := range manager.philosophers {
+			manager.current = phil
+			break
+		}
+	}
+
 	return manager, nil
 }
 
@@ -79,6 +88,12 @@ func (m *Manager) SetCurrentPhilosopher(name string) error {
 }
 
 func (m *Manager) GetCurrentPhilosopher() Philosopher {
+	if m.current == nil {
+		// 如果当前哲学家为nil，返回第一个可用的哲学家
+		for _, phil := range m.philosophers {
+			return phil
+		}
+	}
 	return m.current
 }
 
