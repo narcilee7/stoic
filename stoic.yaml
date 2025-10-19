@@ -1,4 +1,6 @@
-llm:
+# Stoic 配置文件
+
+ai:
   provider: ollama
   ollama:
     base_url: http://localhost:11434
@@ -7,3 +9,20 @@ llm:
 ui:
   theme: calm
   language: zh
+
+philosophers:
+  # 可以在这里添加自定义哲学家配置
+  # 或者禁用某些默认哲学家
+  custom:
+    #- id: my_philosopher
+    #  name: "My Philosopher"
+    #  school: "Custom School"
+    #  description: "My custom philosopher"
+    #  personality: "Wise and thoughtful"
+    #  style: "Gentle and poetic"
+    #  emoji: "🤔"
+    #  enabled: true
+    #  prompt: "You are a wise philosopher..."
+  
+  # 禁用某些默认哲学家
+  disabled: [] # 可以添加: ["epicurean", "existentialist"]
