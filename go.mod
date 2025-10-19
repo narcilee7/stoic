@@ -5,7 +5,6 @@ go 1.25.0
 require (
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.0
-	github.com/narcilee7/stoic v0.0.0-20251019060905-3298adc68eb5
 	github.com/spf13/viper v1.21.0
 )
 

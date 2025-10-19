@@ -27,7 +27,6 @@ type UIConfig struct {
 	Language string `mapstructure:"language"`
 }
 
-// 将 PhilosopherConfig 移到这里，避免循环依赖
 type PhilosopherConfig struct {
 	ID          string `yaml:"id" mapstructure:"id"`
 	Name        string `yaml:"name" mapstructure:"name"`
