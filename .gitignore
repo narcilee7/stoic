@@ -12,6 +12,7 @@ cover.out
 /bin
 /pkg
 /build
+/dist
 
 /vendor
 
