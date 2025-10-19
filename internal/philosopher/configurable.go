@@ -10,7 +10,6 @@ import (
 	"github.com/stoic/provider"
 )
 
-// ConfigurablePhilosopher 可配置的哲学家
 type ConfigurablePhilosopher struct {
 	config      config.PhilosopherConfig
 	provider    provider.Provider
@@ -26,7 +25,6 @@ type ConversationMemory struct {
 	Emotion             string    `json:"emotion"`
 }
 
-// NewConfigurablePhilosopher 创建可配置哲学家
 func NewConfigurablePhilosopher(config config.PhilosopherConfig, provider provider.Provider) *ConfigurablePhilosopher {
 	return &ConfigurablePhilosopher{
 		config:   config,
