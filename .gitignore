@@ -31,3 +31,6 @@ temp/
 
 
 /go/pkg/mod
+
+# ai
+docs/
