@@ -1,0 +1,15 @@
+# GORM SQLite configuration
+[development]
+dsn = "file:data/stoic_dev.db?cache=shared&_foreign_keys=on&_journal_mode=WAL"
+log_level = "info"
+auto_migrate = true
+
+[test]
+dsn = "file::memory:?cache=shared"
+log_level = "error"
+auto_migrate = true
+
+[production]
+dsn = "file:/var/lib/stoic/data/stoic.db?cache=shared&_foreign_keys=on&_journal_mode=WAL"
+log_level = "warn"
+auto_migrate = false
