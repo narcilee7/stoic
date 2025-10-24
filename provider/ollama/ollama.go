@@ -9,10 +9,6 @@ import (
 	"time"
 )
 
-type Provider interface {
-	Generate(ctx context.Context, prompt string) (string, error)
-}
-
 type OllamaProvider struct {
 	baseURL string
 	client  *http.Client
