@@ -29,8 +29,9 @@ Thumbs.db
 tmp/
 temp/
 
-
-/go/pkg/mod
+node_modules/
 
 # ai
 docs/
+
+/src/generated/prisma
