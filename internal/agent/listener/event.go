@@ -277,7 +277,7 @@ func NewEvent(eventType EventType, source string, value float64) *Event {
 		Timestamp:  time.Now(),
 		Processed:  false,
 		Confidence: 0.9, // 默认置信度
-		Severity:   determineSeverity(eventType, value),
+		Severity:   DetermineSeverity(eventType, value),
 	}
 }
 
@@ -293,7 +293,7 @@ func generateEventID() string {
 }
 
 // 根据事件类型和值确定严重程度
-func determineSeverity(eventType EventType, value float64) EventSeverity {
+func DetermineSeverity(eventType EventType, value float64) EventSeverity {
 	switch eventType {
 	case EventCPUCritical, EventStressHigh:
 		return SeverityCritical

@@ -38,11 +38,6 @@ func (d *darwinCPUReader) GetCPUSample() (*CPUSample, error) {
 		return nil, fmt.Errorf("failed to parse user percentage: %w", err)
 	}
 
-	nice, err := strconv.ParseFloat(fields[1], 64)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse nice percentage: %w", err)
-	}
-
 	system, err := strconv.ParseFloat(fields[2], 64)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse system percentage: %w", err)
@@ -156,9 +151,3 @@ func (d *darwinCPUReader) GetCPUFrequency() (float64, error) {
 func (d *darwinCPUReader) GetPlatformName() string {
 	return "darwin"
 }
-
-// // init 注册macOS平台读取器
-// func init() {
-// 	// 在platform.go中注册这个实现
-// 	registerPlatformReader("darwin", &darwinCPUReader{})
-// }

@@ -7,6 +7,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/stoic/internal/agent/listener"
 )
 
 // CPUConfig CPU监听器配置
@@ -60,10 +62,16 @@ type CPUSample struct {
 
 // CPUListener CPU监听器接口
 type CPUListener interface {
+	Start() error
+	Stop() error
+	IsActive() bool
+	GetName() string
+	GetType() string
 	GetCurrentStats() *CPUStats
 	GetHistory() []CPUStats
-	// GetEventChannel() <-chan *Event
+	GetEventChannel() <-chan *listener.Event
 	GetLoadAverage() (float64, float64, float64)
+	GetStats() map[string]interface{}
 }
 
 // cpuListenerImpl CPU监听器实现
@@ -83,7 +91,7 @@ type cpuListenerImpl struct {
 	history      []CPUStats
 
 	// 事件通道
-	eventChan chan *Event
+	eventChan chan *listener.Event
 
 	// 统计
 	stats *CPUListenerStats
@@ -112,8 +120,8 @@ func NewCPUListener(config *CPUConfig) (CPUListener, error) {
 		config:    config,
 		ctx:       ctx,
 		cancel:    cancel,
-		history:   make([]CPUStats, 0, config.HistorySize), // 修正：创建空切片而不是固定大小数组
-		eventChan: make(chan *Event, config.BufferSize),
+		history:   make([]CPUStats, 0, config.HistorySize),
+		eventChan: make(chan *listener.Event, config.BufferSize),
 		stats:     &CPUListenerStats{},
 	}
 
@@ -184,26 +192,46 @@ func (c *cpuListenerImpl) GetHistory() []CPUStats {
 	return history
 }
 
-func (c *cpuListenerImpl) GetEventChannel() <-chan *Event {
+func (c *cpuListenerImpl) GetEventChannel() <-chan *listener.Event {
 	return c.eventChan
 }
 
 func (c *cpuListenerImpl) GetLoadAverage() (float64, float64, float64) {
-	return getLoadAverage()
+	v1, v5, v15, err := platformReader.GetLoadAverage()
+	if err != nil {
+		return 0.0, 0.0, 0.0
+	}
+	return v1, v5, v15
+}
+
+func (c *cpuListenerImpl) GetCPUSample() *CPUSample {
+	sample, err := platformReader.GetCPUSample()
+	if err != nil {
+		return nil
+	}
+	return sample
+}
+
+func (c *cpuListenerImpl) GetCPUTemperature() float64 {
+	temp, err := platformReader.GetCPUTemperature()
+	if err != nil {
+		return 0.0
+	}
+	return temp
 }
 
 func (c *cpuListenerImpl) collectLoop() {
 	ticker := time.NewTicker(c.config.SampleInterval)
 	defer ticker.Stop()
 
-	c.lastSample = c.getCPUStample()
+	c.lastSample = c.GetCPUSample()
 
 	for {
 		select {
 		case <-c.ctx.Done():
 			return
 		case <-ticker.C:
-			if err := collectSample(); err != nil {
+			if err := c.collectSample(); err != nil {
 				c.stats.ErrorsEncountered++
 				continue
 			}
@@ -211,15 +239,23 @@ func (c *cpuListenerImpl) collectLoop() {
 	}
 }
 
+func (c *cpuListenerImpl) GetCPUFrequency() float64 {
+	freq, err := platformReader.GetCPUFrequency()
+	if err != nil {
+		return 0.0
+	}
+	return freq
+}
+
 func (c *cpuListenerImpl) collectSample() error {
 	// 获取新的cpu样本
-	newSample := c.getCPUSample()
+	newSample := c.GetCPUSample()
 	if newSample == nil {
 		return fmt.Errorf("failed to get CPU sample")
 	}
 
-	stats := c.calculateCPUUsage(c.lastSample, newSample)
-	if stats == nil {
+	stats, err := c.calculateCPUUsage(c.lastSample, newSample)
+	if err == nil {
 		return fmt.Errorf("failed to calculate CPU usage")
 	}
 
@@ -243,14 +279,14 @@ func (c *cpuListenerImpl) collectSample() error {
 	return nil
 }
 
-func (c *cpuListenerImpl) calculateCPUUsage(prev, curr *CPUSample) *CPUStats {
+func (c *cpuListenerImpl) calculateCPUUsage(prev, curr *CPUSample) (*CPUStats, error) {
 	if prev == nil || curr == nil {
-		return nil
+		return nil, nil
 	}
 
 	totalDiff := curr.TotalTime - prev.TotalTime
 	if totalDiff == 0 {
-		return nil
+		return nil, nil
 	}
 
 	userDiff := curr.UserTime - prev.UserTime
@@ -266,7 +302,7 @@ func (c *cpuListenerImpl) calculateCPUUsage(prev, curr *CPUSample) *CPUStats {
 	totalPercent := 100 - idlePercent
 
 	coreCount := runtime.NumCPU()
-	load1, load5, load15 := getLoadAverage()
+	load1, load5, load15 := c.GetLoadAverage() // 使用已有的函数获取负载
 
 	stats := &CPUStats{
 		UsagePercent:  totalPercent,
@@ -282,10 +318,10 @@ func (c *cpuListenerImpl) calculateCPUUsage(prev, curr *CPUSample) *CPUStats {
 		Timestamp:     curr.Timestamp,
 	}
 
-	stats.Temperature = getCPUTemperature()
-	stats.Frequency = getCPUFrequency()
+	stats.Temperature = c.GetCPUTemperature()
+	stats.Frequency = c.GetCPUFrequency()
 
-	return stats
+	return stats, nil
 }
 
 func (c *cpuListenerImpl) addToHistory(stats *CPUStats) error {
@@ -334,16 +370,33 @@ func (c *cpuListenerImpl) checkThresholds(stats *CPUStats) {
 
 // generateEvent 生成事件
 func (c *cpuListenerImpl) generateEvent(eventType string, value float64, metadata map[string]interface{}) {
-	select {
-	case c.eventChan <- &Event{
+	// 转换事件类型字符串到EventType
+	var evtType listener.EventType
+	switch eventType {
+	case "cpu_warning":
+		evtType = listener.EventCPUWarning
+	case "cpu_critical":
+		evtType = listener.EventCPUCritical
+	default:
+		evtType = listener.EventType(eventType) // fallback
+	}
+
+	event := &listener.Event{
 		ID:         fmt.Sprintf("cpu_%s_%d", eventType, time.Now().Unix()),
-		Type:       eventType,
+		Type:       evtType,
 		Source:     "cpu_listener",
-		Value:      value,
+		Value:      value / 100.0, // 将百分比转换为0-1范围
 		Metadata:   metadata,
 		Timestamp:  time.Now(),
 		Confidence: 0.9, // CPU数据置信度较高
-	}:
+		Processed:  false,
+	}
+
+	// 设置严重程度
+	event.Severity = listener.DetermineSeverity(evtType, value)
+
+	select {
+	case c.eventChan <- event:
 		c.stats.EventsGenerated++
 	default:
 		// 通道满了，丢弃事件
