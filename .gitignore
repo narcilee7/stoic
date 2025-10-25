@@ -33,3 +33,5 @@ node_modules/
 
 # ai
 docs/
+
+/src/generated/prisma
