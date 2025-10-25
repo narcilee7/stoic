@@ -1,8 +1,8 @@
 {
   "name": "stoic",
-  "version": "1.0.0",
-  "description": "## Description",
-  "main": "index.js",
+  "version": "0.0.1",
+  "description": "AI-powered emotional wellness agent for developers - terminal × desktop联动「情绪-认知-摸鱼」工具",
+  "main": "dist/index.js",
   "type": "module",
   "directories": {
     "doc": "docs",
@@ -10,20 +10,76 @@
   },
   "scripts": {
     "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
     "test": "vitest",
     "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
     "lint": "eslint . --ext .js,.ts",
     "lint:fix": "eslint . --ext .js,.ts --fix",
-    "format": "prettier --write \"src/**/*.{js,ts}\""
+    "format": "prettier --write \"src/**/*.{js,ts}\"",
+    "format:check": "prettier --check \"src/**/*.{js,ts}\"",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "prestart": "npm run build"
   },
-  "keywords": [],
+  "keywords": [
+    "stoic",
+    "quote",
+    "tui",
+    "agent",
+    "cli",
+    "emotional-wellness",
+    "mental-health",
+    "developer-tools",
+    "ai-agent",
+    "productivity",
+    "mindfulness",
+    "cognitive-behavioral-therapy"
+  ],
   "author": "narcilee7",
-  "license": "ISC",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "chalk": "^5.3.0",
+    "ora": "^8.1.0",
+    "inquirer": "^12.1.0",
+    "cli-table3": "^0.6.5",
+    "boxen": "^8.0.1",
+    "figlet": "^1.8.0",
+    "gradient-string": "^3.0.0",
+    "systeminformation": "^5.25.11",
+    "node-cron": "^3.0.3",
+    "sqlite3": "^5.1.7",
+    "better-sqlite3": "^12.1.0",
+    "axios": "^1.7.9",
+    "ws": "^8.18.0",
+    "node-notifier": "^10.0.1",
+    "electron": "^33.3.1",
+    "conf": "^13.1.0",
+    "p-retry": "^6.2.1",
+    "p-timeout": "^6.1.4",
+    "eventemitter3": "^5.0.1",
+    "lodash": "^4.17.21",
+    "dayjs": "^1.11.13",
+    "uuid": "^11.0.3"
+  },
   "devDependencies": {
     "@eslint/js": "^9.38.0",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/figlet": "^1.7.0",
+    "@types/inquirer": "^9.0.7",
+    "@types/lodash": "^4.17.13",
     "@types/node": "^24.9.1",
+    "@types/uuid": "^10.0.0",
+    "@types/ws": "^8.5.13",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
+    "@vitest/coverage-v8": "^4.0.2",
     "@vitest/ui": "^4.0.2",
     "eslint": "^9.38.0",
     "eslint-config-prettier": "^10.1.8",
@@ -31,8 +87,17 @@
     "globals": "^16.4.0",
     "jsdom": "^27.0.1",
     "prettier": "^3.6.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2",
     "vitest": "^4.0.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/narcilee7/stoic.git"
+  },
+  "bugs": {
+    "url": "https://github.com/narcilee7/stoic/issues"
+  },
+  "homepage": "https://github.com/narcilee7/stoic#readme"
 }
