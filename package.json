@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "@ltd/j-toml": "^1.38.0",
+    "@types/node-notifier": "^8.0.5",
     "axios": "^1.7.9",
     "better-sqlite3": "^12.1.0",
     "boxen": "^8.0.1",

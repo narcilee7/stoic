@@ -11,6 +11,9 @@ importers:
       '@ltd/j-toml':
         specifier: ^1.38.0
         version: 1.38.0
+      '@types/node-notifier':
+        specifier: ^8.0.5
+        version: 8.0.5
       axios:
         specifier: ^1.7.9
         version: 1.12.2
@@ -935,6 +938,9 @@ packages:
 
   '@types/lodash@4.17.20':
     resolution: {integrity: sha512-H3MHACvFUEiujabxhaI/ImO6gUrd8oOurg7LQtS7mbwIXA/cUqWrvBsaeJ23aZEPk1TAYkurjfMbSELfoCXlGA==}
+
+  '@types/node-notifier@8.0.5':
+    resolution: {integrity: sha512-LX7+8MtTsv6szumAp6WOy87nqMEdGhhry/Qfprjm1Ma6REjVzeF7SCyvPtp5RaF6IkXCS9V4ra8g5fwvf2ZAYg==}
 
   '@types/node@20.19.23':
     resolution: {integrity: sha512-yIdlVVVHXpmqRhtyovZAcSy0MiPcYWGkoO4CGe/+jpP0hmNuihm4XhHbADpK++MsiLHP5MVlv+bcgdF99kSiFQ==}
@@ -3478,6 +3484,10 @@ snapshots:
       '@types/node': 24.9.1
 
   '@types/lodash@4.17.20': {}
+
+  '@types/node-notifier@8.0.5':
+    dependencies:
+      '@types/node': 24.9.1
 
   '@types/node@20.19.23':
     dependencies:

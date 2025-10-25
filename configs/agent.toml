@@ -1,0 +1,6 @@
+enabled = true
+processInterval = 5000
+cpuThreshold = 80.0
+cpuWarningThreshold = 70.0  # CPU使用率超过70%时触发警告
+cpuCriticalThreshold = 90.0 # CPU使用率超过90%时触发临界事件
+notificationsEnabled = true # 是否允许Agent发送桌面通知

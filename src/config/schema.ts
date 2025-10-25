@@ -6,8 +6,12 @@ export const agentConfigSchema = z.object({
   eventBufferSize: z.number().int().positive().default(1000),
   processInterval: z.number().int().positive().default(5000), // ms
   maxEventsPerBatch: z.number().int().positive().default(50),
+  cpuThreshold: z.number().min(0).max(100).default(80), // %
+  cpuWarningThreshold: z.number().min(0).max(100).default(70), // %
+  cpuCriticalThreshold: z.number().min(0).max(100).default(90), // %
   cooldownPeriod: z.number().int().positive().default(30000), // ms
   privacyLevel: z.enum(['standard', 'strict', 'minimal']).default('standard'),
+  notificationsEnabled: z.boolean().default(true), // 新增
 });
 export type AgentConfig = z.infer<typeof agentConfigSchema>;
 

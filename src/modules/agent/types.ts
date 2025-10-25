@@ -3,7 +3,8 @@ import { z } from 'zod';
 // -- Event --
 export const eventTypeSchema = z.enum([
   // 系统事件
-  'cpu_usage_high',
+  'cpu_usage_warning',
+  'cpu_usage_critical',
   'memory_usage_high',
   // 用户行为事件
   'keyboard_burst',
@@ -27,7 +28,7 @@ export const agentEventSchema = z.object({
   severity: eventSeveritySchema,
   timestamp: z.date(),
   value: z.number().optional(), // 可选的标准化数值 (0-1)
-  metadata: z.record(z.any(), z.string()).optional(),
+  metadata: z.record(z.any(), z.union([z.string(), z.number()])).optional(),
 });
 
 export type AgentEvent = z.infer<typeof agentEventSchema>;

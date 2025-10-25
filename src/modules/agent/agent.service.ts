@@ -1,9 +1,15 @@
 import { config } from '@/config';
 import { eventBus } from '@/shared/core/event-bus';
 import { AgentEvent, Intervention } from './types';
+import { CpuListener } from './listeners/cpu.listener';
+import { PlannerService } from './planner/planner.service';   // 导入 Planner
+import { ExecutorService } from './executors/executor.service'; // 导入 Executor
 
 class AgentService {
   private isRunning = false;
+  private listeners: { start: () => void; stop: () => void }[] = [];
+  private planner?: PlannerService;
+  private executor?: ExecutorService;
 
   constructor() {
     if (config.agent.enabled) {
@@ -16,58 +22,57 @@ class AgentService {
   private initialize() {
     console.log('🚀 Initializing Agent Service...');
 
-    // 订阅事件
+    // 订阅事件 (Agent Service 自身也可以订阅)
     eventBus.on('agent:event', this.handleEvent);
     eventBus.on('agent:intervention', this.handleIntervention);
 
-    // TODO: 初始化 Listeners, Planner, Executors
-    // this.initListeners();
-    // this.initPlanner();
-    // this.initExecutors();
+    // 初始化所有子模块
+    this.initListeners();
+    this.initPlanner();
+    this.initExecutors();
 
     console.log('✅ Agent Service initialized.');
   }
 
+  private initListeners() {
+    console.log('👂 Initializing listeners...');
+    this.listeners.push(new CpuListener());
+  }
+
+  private initPlanner() {
+    console.log('🧠 Initializing planner...');
+    this.planner = new PlannerService();
+  }
+
+  private initExecutors() {
+    console.log('💪 Initializing executors...');
+    this.executor = new ExecutorService();
+  }
+
   public start() {
-    if (!config.agent.enabled || this.isRunning) {
-      return;
-    }
+    if (!config.agent.enabled || this.isRunning) return;
     console.log('▶️ Starting Agent...');
     this.isRunning = true;
-    // TODO: 启动所有监听器
+    this.listeners.forEach(listener => listener.start());
   }
 
   public stop() {
-    if (!this.isRunning) {
-      return;
-    }
+    if (!this.isRunning) return;
     console.log('⏹️ Stopping Agent...');
     this.isRunning = false;
-    // TODO: 停止所有监听器
+    this.listeners.forEach(listener => listener.stop());
   }
 
-  /**
-   * 处理由监听器发布的事件
-   * @param event AgentEvent
-   */
   private handleEvent = (event: AgentEvent) => {
     if (!this.isRunning) return;
-
-    console.log(`🧠 Received event: ${event.type} from ${event.source}`, event);
-    // TODO: 将事件转发给 Planner 进行决策
+    // Agent Service 自身也可以对事件做一些通用处理，比如记录日志
+    // console.log(`[Agent Service] Logging event: ${event.type}`);
   };
 
-  /**
-   * 处理由规划器制定的干预计划
-   * @param intervention Intervention
-   */
   private handleIntervention = (intervention: Intervention) => {
     if (!this.isRunning) return;
-
-    console.log(`💪 Received intervention: ${intervention.type} from ${intervention.source}`, intervention);
-    // TODO: 将干预计划转发给 Executor 执行
+    // Agent Service 自身也可以对干预做一些通用处理
   };
 }
 
-// 创建并导出一个单例的 AgentService 实例
 export const agentService = new AgentService();
