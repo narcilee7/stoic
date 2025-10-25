@@ -1,15 +1,1 @@
-# Stoic 配置文件
-
-llm:
-  provider: ollama
-  ollama:
-    base_url: http://localhost:11434
-    model: llama2
-
-ui:
-  theme: calm
-  language: zh
-
-philosophers:
-  custom: []  # 自定义哲学家
-  disabled: []  # 禁用的哲学家
+# stoic configuration file
